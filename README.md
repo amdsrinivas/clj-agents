@@ -1,6 +1,12 @@
 # clj-agents
 
-A Clojure project scaffolded with `deps.edn` and modern Clojure tooling.
+An **agent framework** for building LLM-powered agents in Clojure. Provides
+reusable infrastructure for agent execution, tool integration, schema
+validation, and LLM communication — with a built-in **file-explorer agent**
+as a working example.
+
+**Tech stack:** Clojure 1.12 + `deps.edn`, Malli (schema/validation),
+clj-http (LLM API), JSONista / Cheshire (JSON).
 
 ## Prerequisites
 
@@ -11,13 +17,20 @@ A Clojure project scaffolded with `deps.edn` and modern Clojure tooling.
 
 ```
 clj-agents/
-├── deps.edn          # Dependency and alias configuration
-├── build.clj         # Build script using tools.build
-├── env.example       # Example environment configuration
-├── README.md         # This file
+├── deps.edn                  # Dependency and alias configuration
+├── build.clj                 # Build script using tools.build
+├── env.example               # Example environment configuration
+├── README.md                 # This file
 ├── src/
 │   └── clj_agents/
-│       └── core.clj  # Main source code
+│       ├── core.clj          # Entry point — file-explorer example agent
+│       └── core/
+│           ├── config.clj    # .env / environment variable loading
+│           ├── utils.clj     # Shared utilities
+│           ├── agents/       # Agent execution engine
+│           ├── llm/          # LLM API client and schemas
+│           ├── state/        # Session state schemas
+│           └── tools/        # Tool execution infrastructure
 └── test/
     └── clj_agents/
         └── core_test.clj  # Tests
@@ -39,29 +52,40 @@ The `.env` file is loaded at runtime to configure LLM API connection settings. T
 | `LLM_API_ENDPOINT` | API endpoint path |
 | `LLM_API_KEY` | API key for the LLM provider |
 | `LLM_MODEL` | Model identifier to use |
-| `ENABLE_DEBUG` | Set to `true` to print LLM request/response payloads to the console |
+| `ENABLE_DEBUG` | Set to `true` to print LLM request/response payloads and schema validation warnings to the console |
 
 > **Note:** `.env` is gitignored — you must create it manually on each clone.
 
 ## Usage
 
-### Run the application
+### Run the example agent (file-explorer)
 
 ```bash
 clojure -M:run
 ```
 
-The application accepts an optional working directory argument. If omitted, it defaults to the current directory:
+This launches the built-in **file-explorer** agent — an interactive loop where
+an AI agent can explore a target project directory using filesystem tools
+(`list_directory`, `read_file`, `file_info`). It accepts an optional working
+directory argument (defaults to the current directory):
 
 ```bash
 clojure -M:run /path/to/target/project
 ```
 
-This sets the workspace root that file system tools (e.g. `list_directory`, `read_file`, `file_info`) operate within.
+This sets the workspace root that the filesystem tools operate within.
 
 #### Debug logging
 
-Set `ENABLE_DEBUG=true` in `.env` to print verbose LLM request and response payloads to the console. This is useful for inspecting API calls during development.
+Set `ENABLE_DEBUG=true` in `.env` to print verbose LLM request/response
+payloads and schema validation warnings to the console. Useful for inspecting
+API calls and debugging agent behavior during development.
+
+### Building your own agent
+
+The framework modules under `src/clj_agents/core/` can be composed to create
+custom agents. See `core.clj` and the example file-explorer tools in
+`core/tools/filesystem.clj` for reference.
 
 ### Start a REPL
 
